@@ -1,8 +1,7 @@
 import asyncio
-import websockets
 import json
 
-import logging
+import websockets
 
 
 class BaseWebsocketClient:
@@ -50,6 +49,8 @@ class BaseWebsocketClient:
 
     async def close(self):
         """Closes the Websocket connection"""
+        # if self._listener_task:
+        #     self._listener_task.cancel()
         if self._connection:
             await self._connection.close()
             print("Websoocket connection closed")
