@@ -1,29 +1,26 @@
 import asyncio
 import json
 
-from internal.ws.client import WebsocketClient
+from internal.ws.client import TradingWebsocketClient
+from shared.utils.data_manager import PriceDataManager
 
 
-# --- How to Use It ---
 async def main():
     # Replace with your app_id
     app_id = 83085
     uri = f"wss://ws.derivws.com/websockets/v3?app_id={app_id}"
     # uri = f"wss://demo.piesocket.com/v3/channel_123?api_key=VCXCEuvhGcBDP7XhiJJUDvR1e1D3eiVjgZ9VRiaV&notify_self"
 
-    client = WebsocketClient(uri)
+    price_manager = PriceDataManager()
+
+    client = TradingWebsocketClient(uri, price_manager)
+
     await client.connect()
 
     try:
-        # --- Request 1: Ping ---
-        # print("\nSending Ping request...")
-        # ping_response = await client.send_request({"ping": 1})
-        # print("--- Ping Response ---")
-        # print(json.dumps(ping_response, indent=2))
-
-        # --- Request 2: Get Active Symbols ---
+        # --- Request 2: Get Tick History ---
         print("\nSending Step 100 tick history request...")
-        symbols_response = await client.send_request(
+        historical_candles = await client.tick_history(
             {
                 "ticks_history": "stpRNG",
                 "adjust_start_time": 1,
@@ -34,13 +31,11 @@ async def main():
                 "style": "candles",
             }
         )
+        # print(historical_candles)
 
-        print("--- Step 100 Response ---")
-        print(symbols_response)
-        # print(f"Found {len(symbols_response.get('active_symbols', []))} symbols.")
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
+        # Convert dictionary to DataFrame
+        price_manager.initialize_history(historical_candles['candles'])
+        print(price_manager.get_dataframe())
     finally:
         await client.close()
 

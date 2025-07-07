@@ -1,11 +1,14 @@
 import asyncio
 import json
+from asyncio import Task
+
 
 import websockets
 
 
 class BaseWebsocketClient:
     """Handles the low-level WebSocket connection and message loop"""
+    _listener_task: Task | None = None
 
     def __init__(self, uri):
         self._uri = uri
@@ -16,11 +19,11 @@ class BaseWebsocketClient:
         """Establishes the Websocket connection"""
         try:
             self._connection = await websockets.connect(self._uri)
-            print("Websocket connection established.")
+            print("\n🔗 Websocket connection established with broker.")
             # Start the listener loop as a concurrent task
-            asyncio.create_task(self._listen())
+            self._listener_task = asyncio.create_task(self._listen())
         except (websockets.exceptions.ConnectionClosedError, OSError) as e:
-            print(f"Connection failed: {e}. Retrying...")
+            print(f"❌ Connection failed: {e}. Retrying...")
             await asyncio.sleep(5)
             await self.connect()
 
@@ -38,7 +41,7 @@ class BaseWebsocketClient:
                     # Let the dispatcher handle the data
                     await self._handler_dispatcher(data)
             except websockets.exceptions.ConnectionClosedError:
-                print("Connection lostt. Reconnecting...")
+                print("Connection lost. Reconnecting...")
                 await self.connect()
                 break  # Exit this loop, a new one start on reconnect
 
@@ -46,11 +49,13 @@ class BaseWebsocketClient:
         """Sends a JSON message to the server"""
         if self._connection:
             await self._connection.send(json.dumps(message))
+            # print("Sent message", message)
 
     async def close(self):
         """Closes the Websocket connection"""
-        # if self._listener_task:
-        #     self._listener_task.cancel()
+        # Destroy the `listen()` task
+        if self._listener_task:
+            self._listener_task.cancel()
         if self._connection:
             await self._connection.close()
             print("Websoocket connection closed")

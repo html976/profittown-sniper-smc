@@ -1,1 +1,4 @@
-websockets
+websockets==15.0.1
+numpy==1.26.4
+pandas==2.2.3
+memory-profiler==0.61.0

@@ -1,6 +1,10 @@
 import asyncio
+from asyncio import Future
+
+from typing import Dict
 
 from shared.utils.helpers import generate_random_number
+from shared.utils.data_manager import PriceDataManager
 
 from . import handlers
 from .base import BaseWebsocketClient
@@ -11,9 +15,10 @@ class TradingWebsocketClient(BaseWebsocketClient):
     Application-specific client that maps message topics to handlersS
     """
 
-    _pending_requests = {}
+    price_manager: PriceDataManager
+    _pending_requests: Dict[int, Future] = {}
 
-    def __init__(self, uri):
+    def __init__(self, uri, price_manager):
         super().__init__(uri)
 
         # The 'dispatcher' maps topics to the functions that handle them
@@ -23,8 +28,25 @@ class TradingWebsocketClient(BaseWebsocketClient):
         self.set_handler_dispatcher(self._dispatch_message)
 
     async def _dispatch_message(self, data: dict):
-        """Finds the correct handler based on the message topic."""
-        topic = data.get("topic")
+        """
+        Intelligently routes messages. It first checks for a specific response
+        to a waiting request, and if not found, falls back to general event
+        handlers
+        """
+        # --- Part 1: Logic for Request-Response Pattern ----
+        # First check if the message is a direct reply to a waiting function
+        req_id = data.get("req_id")
+        if req_id and req_id in self._pending_requests:
+            # IF it is, find the waiting 'Future' and give it the result
+            future = self._pending_requests.pop(req_id)
+            future.set_result(data)
+
+            # Exit immediately so it doesn't try to find a handler
+            return
+
+        # --- Part 2: Existing Logic for Event-Driven Handlers
+        # If the message was not a direct reply, proceed to find a handler
+        topic = data.get("msg_type")
         handler = self._handlers.get(topic)
 
         if handler:
