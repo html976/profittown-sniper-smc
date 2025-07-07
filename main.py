@@ -4,6 +4,8 @@ import json
 from internal.ws.client import TradingWebsocketClient
 from shared.utils.data_manager import PriceDataManager
 
+from shared.rules.bos import detect_bos
+
 
 async def main():
     # Replace with your app_id
@@ -25,7 +27,7 @@ async def main():
                 "ticks_history": "stpRNG",
                 "adjust_start_time": 1,
                 "granularity": 900,
-                "count": 100,
+                "count": 10000,
                 "end": "latest",
                 "start": 1,
                 "style": "candles",
@@ -35,7 +37,9 @@ async def main():
 
         # Convert dictionary to DataFrame
         price_manager.initialize_history(historical_candles['candles'])
-        print(price_manager.get_dataframe())
+        historical_candles = price_manager.get_dataframe()
+
+        print("\n", detect_bos(historical_candles))
     finally:
         await client.close()
 

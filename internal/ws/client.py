@@ -12,7 +12,7 @@ from .base import BaseWebsocketClient
 
 class TradingWebsocketClient(BaseWebsocketClient):
     """
-    Application-specific client that maps message topics to handlersS
+    Application-specific client that maps message topics to handlers
     """
 
     price_manager: PriceDataManager
@@ -22,7 +22,7 @@ class TradingWebsocketClient(BaseWebsocketClient):
         super().__init__(uri)
 
         # The 'dispatcher' maps topics to the functions that handle them
-        self._handlers = {"price_tick": handlers.handle_price_tick}
+        self._handlers = {"price_tick": handlers.handle_tick_history}
 
         # Set dispatcher for the base client to use
         self.set_handler_dispatcher(self._dispatch_message)
@@ -36,8 +36,9 @@ class TradingWebsocketClient(BaseWebsocketClient):
         # --- Part 1: Logic for Request-Response Pattern ----
         # First check if the message is a direct reply to a waiting function
         req_id = data.get("req_id")
+
         if req_id and req_id in self._pending_requests:
-            # IF it is, find the waiting 'Future' and give it the result
+            # If it is, find the waiting 'Future' and give it the result
             future = self._pending_requests.pop(req_id)
             future.set_result(data)
 
