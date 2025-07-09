@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 def check_fibonacci_zone(df: pd.DataFrame, ob: dict, direction: str):
     """
     Checks if the Order Block is within the 61.8% - 78.6% Fibonacci zone.
