@@ -4,7 +4,7 @@ import json
 from internal.ws.client import TradingWebsocketClient
 from shared.utils.data_manager import PriceDataManager
 
-from shared.rules.bos import detect_bos
+from shared.rules.bos import detect_bos, visualize_bos
 
 
 async def main():
@@ -26,8 +26,8 @@ async def main():
             {
                 "ticks_history": "stpRNG",
                 "adjust_start_time": 1,
-                "granularity": 900,
-                "count": 10000,
+                "granularity": 900,   # 4 hour TF
+                "count": 300,
                 "end": "latest",
                 "start": 1,
                 "style": "candles",
@@ -39,7 +39,12 @@ async def main():
         price_manager.initialize_history(historical_candles['candles'])
         historical_candles = price_manager.get_dataframe()
 
-        print("\n", detect_bos(historical_candles))
+        direction, results = detect_bos(historical_candles)
+        print("\n", results)
+
+        # Now visualize it
+        # if direction:
+        visualize_bos(historical_candles, "bullish", 8000, 20)
     finally:
         await client.close()
 
