@@ -25,7 +25,7 @@ async def main():
         historical_data = await client.tick_history({
             "ticks_history": "stpRNG",
             "adjust_start_time": 1,
-            "granularity": 900,  # 15-minute timeframe
+            "granularity": 14400,  # 4-hour timeframe
             "count": 300,
             "end": "latest",
             "start": 1,
