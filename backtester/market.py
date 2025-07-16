@@ -10,7 +10,7 @@ class MarketSimulator:
         self.balance = initial_balance
         self.equity = initial_balance
         self.open_positions = []
-        self.trade_history = []ÏÏÏßß
+        self.trade_history = []
 
     def _calculate_profit(self, position, close_price: float):
         """Calculates profit or loss in currency."""

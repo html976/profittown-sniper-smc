@@ -4,16 +4,11 @@ import pandas as pd
 from backtester.market import MarketSimulator
 from backtester.data_handler import load_data
 
-# Import your existing SMC rule functions
-from shared.rules.bos import detect_bos
-from shared.rules.smc_conditions import (
-    find_order_block,
-    check_liquidity_sweep,
-    check_fibonacci_zone,
-    check_clean_structure,
-    check_impulse_from_ob
-)
-# Import your risk manager if you have one
+from shared.rules.fibonacci import check_fibonacci_zone
+from shared.rules.ob_filters import find_order_block, check_impulse_from_ob
+from shared.rules.structure import detect_bos, visualize_bos, check_clean_structure
+from shared.rules.liquidity import check_liquidity_sweep
+
 # from shared.utils.risk_manager import calculate_lot_size
 
 def run_backtest():
@@ -21,7 +16,7 @@ def run_backtest():
     # --- 1. Initialization ---
     market = MarketSimulator(initial_balance=1000.0)
     # Make sure you have a CSV with historical data
-    df = load_data('path/to/your/historical_data.csv')
+    df = load_data('data/step100.csv')
     lookback = 50 # Number of candles to establish initial structure
 
     # --- 2. Main Backtesting Loop ---
@@ -38,7 +33,9 @@ def run_backtest():
         bos_direction, bos_level = detect_bos(current_df, lookback=20)
 
         if bos_direction:
+            print("Finding order block")
             ob = find_order_block(current_df, bos_direction)
+            print(ob)
             if ob:
                 # Run confluence checks
                 checks = [
@@ -48,6 +45,7 @@ def run_backtest():
                     check_impulse_from_ob(current_df, ob, bos_level, bos_direction)
                 ]
                 score = sum(checks)
+                print(score)
 
                 # --- 4. Simulate Execution ---
                 if score >= 3: # Your acceptance threshold

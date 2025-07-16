@@ -34,6 +34,7 @@ async def main():
 
         price_manager.initialize_history(historical_data.get('candles', []))
         df = price_manager.get_dataframe()
+        df.to_csv("data/step100.csv")
 
         if df.empty:
             print("Could not fetch historical data. Exiting.")
