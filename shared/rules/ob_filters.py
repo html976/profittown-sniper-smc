@@ -10,7 +10,7 @@ def find_order_block(df: pd.DataFrame, direction: str):
     """
     # We look for the OB in the last `n` candles before the breakout
     search_period = df.iloc[-20:-1]
-
+    
     if direction == 'bullish':
         # Find the last bearish candle before a strong up-move
         down_candles = search_period[search_period['close']

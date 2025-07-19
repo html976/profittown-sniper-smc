@@ -31,11 +31,9 @@ def run_backtest():
 
         # --- 3. Apply Strategy Logic ---
         bos_direction, bos_level = detect_bos(current_df, lookback=20)
-
+        
         if bos_direction:
-            print("Finding order block")
             ob = find_order_block(current_df, bos_direction)
-            print(ob)
             if ob:
                 # Run confluence checks
                 checks = [
