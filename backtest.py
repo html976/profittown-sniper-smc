@@ -15,7 +15,8 @@ def run_backtest():
     """Main function to run the backtesting process."""
     # --- 1. Initialization ---
     market = MarketSimulator(initial_balance=1000.0)
-    # Make sure you have a CSV with historical data
+    
+    # This data is automatically generated when you execute `main.py`
     df = load_data('data/step100.csv')
     lookback = 50 # Number of candles to establish initial structure
 
@@ -31,7 +32,7 @@ def run_backtest():
 
         # --- 3. Apply Strategy Logic ---
         bos_direction, bos_level = detect_bos(current_df, lookback=20)
-        
+
         if bos_direction:
             ob = find_order_block(current_df, bos_direction)
             if ob:
