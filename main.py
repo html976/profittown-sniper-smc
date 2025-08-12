@@ -1,25 +1,26 @@
 import asyncio
 import json
 
-from internal.ws.client import TradingWebsocketClient
-from shared.utils.data_manager import PriceDataManager
-
 import pandas as pd
 
+from internal.ws.client import TradingWebsocketClient
 from shared.rules.fibonacci import check_fibonacci_zone
-from shared.rules.ob_filters import find_order_block, check_impulse_from_ob
-from shared.rules.structure import detect_bos, visualize_bos, check_clean_structure
 from shared.rules.liquidity import check_liquidity_sweep
+from shared.rules.ob_filters import check_impulse_from_ob, find_order_block
+from shared.rules.structure import (check_clean_structure, detect_bos,
+                                    visualize_bos)
+from shared.utils.data_manager import PriceDataManager
 
+APP_ID = 0 # Some number from .env
 
 async def main():
     # --- 1. Setup Client and Fetch Data ---
-    app_id = 83085  # Replace with your app_id if needed
-    uri = f"wss://ws.derivws.com/websockets/v3?app_id={app_id}"
+    
+    uri = f"wss://ws.derivws.com/websockets/v3?app_id={APP_ID}"
     price_manager = PriceDataManager()
     client = TradingWebsocketClient(uri, price_manager)
     await client.connect()
-
+    
     try:
         print("Fetching historical candle data...")
         historical_data = await client.tick_history({
