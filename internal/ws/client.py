@@ -25,7 +25,7 @@ class TradingWebsocketClient(BaseWebsocketClient):
         self._handlers = {"price_tick": handlers.handle_tick_history}
 
         # Set dispatcher for the base client to use
-        self._handler_dispatcher = self._dispatch_message)
+        self._handler_dispatcher = self._dispatch_message
 
     async def _dispatch_message(self, data: dict):
         """
